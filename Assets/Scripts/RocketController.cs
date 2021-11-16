@@ -57,6 +57,16 @@ public class RocketController : MonoBehaviour, ITouchable
             {
                 rb.position = Vector3.Lerp(transform.position, new Vector3(raycastHit.point.x, rb.position.y, rb.position.z), 0.9f);
             }
+            else if (raycastHit.point.x <= leftCorner.x)
+            {
+                rb.position = Vector3.Lerp(transform.position, new Vector3(leftCorner.x, rb.position.y, rb.position.z), 0.9f);
+            }
+
+            else if (raycastHit.point.x >= rightCorner.x)
+            {
+                rb.position = Vector3.Lerp(transform.position, new Vector3(rightCorner.x, rb.position.y, rb.position.z), 0.9f);
+            }
+
         }
     }
 
