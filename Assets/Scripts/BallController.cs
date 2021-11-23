@@ -35,6 +35,8 @@ public class BallController : MonoBehaviour
     private void StartMoveBall()
     {
         direction = new Vector3(UnityEngine.Random.Range(-0.5f, 0.5f), 0, 1);
+        var angle = Quaternion.AngleAxis(direction.magnitude, Vector3.down);
+        transform.rotation *= angle;
         ready = true;
     }
 

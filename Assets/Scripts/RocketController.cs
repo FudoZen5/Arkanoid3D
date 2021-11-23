@@ -5,6 +5,8 @@ public class RocketController : MonoBehaviour, ITouchable
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private BoxCollider boxCollider;
+    [SerializeField] private float rocketSpeed;
+
     private Vector3 leftCorner
     {
         get
@@ -28,9 +30,15 @@ public class RocketController : MonoBehaviour, ITouchable
     {
         var speed = ball.lastVelocity.magnitude;
         ball.direction = collision.GetContact(0).point - boxCollider.bounds.center;
-        ball.rb.velocity = ball.direction.normalized * Mathf.Max(speed, 0f);
+        int angleSign = ball.direction.x > 0 ? 1 : -1;
+        var reflection = Vector3.Lerp(Vector3.forward, Vector3.right, Mathf.Abs(ball.direction.x));
+
+        reflection.x *= angleSign;
+        ball.direction = reflection;
+        ball.rb.velocity = reflection.normalized * Mathf.Max(speed, 0f);
+
         //turning the ball in a chosen direction
-        var angle = Quaternion.AngleAxis(90f, ball.direction.normalized);
+        var angle = Quaternion.AngleAxis(90f, ball.direction);
         ball.transform.rotation = angle;
         playerStats.AddScore();
 
@@ -46,27 +54,15 @@ public class RocketController : MonoBehaviour, ITouchable
     {
         RocketMove();
     }
-
     void RocketMove()
     {
         var mousePosition = Camera.main.ScreenPointToRay(Input.mousePosition);
         int layer = 3;
         if (Physics.Raycast(mousePosition, out RaycastHit raycastHit, Mathf.Infinity, ~layer))
         {
-            if (raycastHit.point.x >= leftCorner.x && raycastHit.point.x <= rightCorner.x)
-            {
-                rb.position = Vector3.Lerp(transform.position, new Vector3(raycastHit.point.x, rb.position.y, rb.position.z), 0.9f);
-            }
-            else if (raycastHit.point.x <= leftCorner.x)
-            {
-                rb.position = Vector3.Lerp(transform.position, new Vector3(leftCorner.x, rb.position.y, rb.position.z), 0.9f);
-            }
-
-            else if (raycastHit.point.x >= rightCorner.x)
-            {
-                rb.position = Vector3.Lerp(transform.position, new Vector3(rightCorner.x, rb.position.y, rb.position.z), 0.9f);
-            }
-
+            float toMouse = raycastHit.point.x - transform.position.x;
+            rb.velocity = new Vector3(Mathf.Lerp(0, toMouse, 0.9f), 0, 0) * rocketSpeed;
+            rb.velocity = Vector3.ClampMagnitude(rb.velocity, rocketSpeed);
         }
     }
 
